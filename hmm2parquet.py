@@ -19,6 +19,7 @@ class ProfilesFile:
                     if line.startswith("HMMER3"):
                         continue
                     if line.startswith("NAME"):
+                        print(f"Processing profile no. {1 + len(self.profiles)}...")
                         name = line.split()[1]
                         curr_profile = ProfileHMM()
                         curr_profile.header["name"] = name
@@ -34,6 +35,7 @@ class ProfilesFile:
                     if line == ("//"):
                         self.profiles[curr_profile.header['name']] = curr_profile
                         curr_profile = None
+                        header_mode = True
                         continue
                     if line.startswith("m->m"):
                         continue
@@ -83,7 +85,6 @@ class ProfileHMM:
         else:
             raise ValueError("Invalid row mode")     
 
-        print(f"with rest: {len(with_rest)}")
         row = pd.DataFrame([with_rest], columns=["state","mode","A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y","m->m","m->i","m->d","i->m","i->i","d->m","d->d", "rest"])
         self.table = self.table.append(row)
 
@@ -105,8 +106,6 @@ class ProfileHMM:
         for i in range(7):
             without_rest.insert(i+22, None)
         with_rest = without_rest + [rest_str]
-        print(with_rest)
-        print(row_mode, len(with_rest))
         return with_rest
     
     def _parse_delete_row(self, line, row_mode):
