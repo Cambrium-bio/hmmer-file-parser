@@ -34,6 +34,7 @@ class ProfilesFile:
                     # not in header mode -> table mode
                     if line == ("//"):
                         self.profiles[curr_profile.header['name']] = curr_profile
+                        curr_profile.save_to_file()
                         curr_profile = None
                         header_mode = True
                         continue
@@ -73,6 +74,14 @@ class ProfileHMM:
         self.header = header
         self.table = pd.DataFrame(columns=["state", "mode", "A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y","m->m","m->i","m->d","i->m","i->i","d->m","d->d", "rest"])
         self.curr_state = None
+        self.data = []
+
+    def save_to_file(self):
+        self.table = self.create_df_from_data()
+        self.table.to_parquet(f"pfam_output/{self.header['name']}.parquet")
+
+    def create_df_from_data(self):
+        return pd.DataFrame(self.data, columns=["state","mode","A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y","m->m","m->i","m->d","i->m","i->i","d->m","d->d", "rest"])
 
     def insert_row(self, line, row_mode:str):
         with_rest = None
@@ -85,8 +94,9 @@ class ProfileHMM:
         else:
             raise ValueError("Invalid row mode")     
 
-        row = pd.DataFrame([with_rest], columns=["state","mode","A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y","m->m","m->i","m->d","i->m","i->i","d->m","d->d", "rest"])
-        self.table = self.table.append(row)
+        #row = pd.DataFrame([with_rest], columns=["state","mode","A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y","m->m","m->i","m->d","i->m","i->i","d->m","d->d", "rest"])
+        #self.table = self.table.append(row)
+        self.data.append(with_rest)
 
     def _parse_normal_row(self, line, row_mode):
         parsed = [el.strip() for el in line.split()]

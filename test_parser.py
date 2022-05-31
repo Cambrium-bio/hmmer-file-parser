@@ -7,4 +7,4 @@ def test_parser():
     for test in tests:
         file = ProfilesFile()
         file.read_file(test)
-        file.to_parquet("pfam_output")
+        #file.to_parquet("pfam_output")
